@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NusaChat</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="flex flex-col h-screen">
+    <header class="bg-blue-500 text-white p-4 text-center">
+      <h1 class="text-2xl font-semibold">NusaChat</h1>
+    </header>
+    <div id="list-message" class="flex-grow p-4 overflow-y-auto"></div>
+    <form id="form" class="flex p-4 bg-gray-100">
+      <input id="input" type="text" class="flex-grow px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300" autocomplete="off" />
+      <button id="button-message" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Send</button>
+    </form>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io({ withCredentials: true });
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const buttonMessage = document.getElementById('button-message');
+    const listMessage = document.getElementById('list-message');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value) {
+        socket.emit('chat message', input.value);
+        input.value = '';
+        buttonMessage.disabled = true;
+        input.disabled = true;
+      }
+    });
+
+    socket.on('chat message', (data) => {
+      const newMessageElement = document.createElement('div');
+      newMessageElement.classList.add('flex', data.source === "api" ? 'justify-start' : 'justify-end');
+      
+      const chatBubble = document.createElement('div');
+      chatBubble.classList.add('py-2', 'px-4', 'rounded-xl', 'text-sm', 'max-w-xs', 'break-words'); // Added max-width and word-break
+      if (data.source === "api") {
+        buttonMessage.disabled = false;
+        input.disabled =false;
+        chatBubble.classList.add('bg-indigo-100', 'rounded-bl-none', 'ml-3'); // Rounded corners only on the left side
+      } else {
+        chatBubble.classList.add('bg-green-100', 'rounded-br-none', 'mr-3'); // Rounded corners only on the right side
+      }
+      chatBubble.innerHTML = `<div id="isi">${data.source === "api" ? data.message : data}</div>`;
+
+      newMessageElement.appendChild(chatBubble);
+      listMessage.appendChild(newMessageElement);
+
+      listMessage.scrollTop = listMessage.scrollHeight;
+    });
+  </script>
+</body>
+</html>
