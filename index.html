@@ -8,9 +8,28 @@
   <div class="flex flex-col h-screen">
     <header class="bg-blue-500 text-white p-4 text-center">
       <h1 class="text-2xl font-semibold">NusaChat</h1>
+      <button id="open-modal-btn" class="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-100">Custom Knowledge</button>
     </header>
-    <div id="list-message" class="flex-grow p-4 overflow-y-auto"></div>
-    <form id="form" class="flex p-4 bg-gray-100">
+
+    <div id="chat-container" class="flex-grow p-4 overflow-y-auto">
+      <div id="list-message" class="flex flex-col space-y-2">
+        </div>
+      <div id="loading-bubble" class="hidden self-start ml-2">
+        <div class="border-t-transparent border-solid animate-spin rounded-full border-blue-400 border-4 h-6 w-6"></div>
+      </div>
+    </div>
+    <div id="knowledge-modal" class="fixed hidden top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+      <div class="bg-white p-8 rounded-md max-w-md">
+        <h2 class="text-xl font-semibold mb-4">Custom Knowledge</h2>
+        <textarea id="knowledge-input" class="w-full h-40 p-2 border rounded-md mb-4" placeholder="Enter your custom knowledge here..."></textarea>
+        <div class="flex justify-end"> 
+          <button id="cancel-btn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 mr-2">Cancel</button>
+          <button id="submit-knowledge-btn" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <form id="form" class="flex p-4 bg-gray-100 items-center sticky bottom-0">
       <input id="input" type="text" class="flex-grow px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:ring focus:border-blue-300" autocomplete="off" />
       <button id="button-message" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Send</button>
     </form>
@@ -31,6 +50,8 @@
         input.value = '';
         buttonMessage.disabled = true;
         input.disabled = true;
+        document.getElementById('loading-bubble').classList.remove('hidden');
+        
       }
     });
 
@@ -39,13 +60,14 @@
       newMessageElement.classList.add('flex', data.source === "api" ? 'justify-start' : 'justify-end');
       
       const chatBubble = document.createElement('div');
-      chatBubble.classList.add('py-2', 'px-4', 'rounded-xl', 'text-sm', 'max-w-xs', 'break-words'); // Added max-width and word-break
+      chatBubble.classList.add('py-2', 'px-4', 'rounded-xl', 'text-sm', 'break-words');
       if (data.source === "api") {
         buttonMessage.disabled = false;
         input.disabled =false;
-        chatBubble.classList.add('bg-indigo-100', 'rounded-bl-none', 'ml-3'); // Rounded corners only on the left side
+        chatBubble.classList.add('bg-indigo-100', 'rounded-bl-none', 'ml-3', 'max-w-xs', 'md:max-w-sm', 'lg:max-w-md');
+        document.getElementById('loading-bubble').classList.add('hidden');
       } else {
-        chatBubble.classList.add('bg-green-100', 'rounded-br-none', 'mr-3'); // Rounded corners only on the right side
+        chatBubble.classList.add('bg-green-100', 'rounded-br-none', 'mr-3', 'max-w-xs', 'md:max-w-sm', 'lg:max-w-md');
       }
       chatBubble.innerHTML = `<div id="isi">${data.source === "api" ? data.message : data}</div>`;
 
@@ -53,6 +75,29 @@
       listMessage.appendChild(newMessageElement);
 
       listMessage.scrollTop = listMessage.scrollHeight;
+    });
+
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const modal = document.getElementById('knowledge-modal');
+    const knowledgeInput = document.getElementById('knowledge-input');
+    const submitKnowledgeBtn = document.getElementById('submit-knowledge-btn');
+
+    openModalBtn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+    });
+
+    submitKnowledgeBtn.addEventListener('click', () => {
+      const customKnowledge = knowledgeInput.value;
+      socket.emit('save-knowledge', customKnowledge); // Send to server
+      modal.classList.add('hidden');
+      knowledgeInput.value = '';
+    });
+
+    const cancelBtn = document.getElementById('cancel-btn');
+    
+    cancelBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      knowledgeInput.value = '';
     });
   </script>
 </body>

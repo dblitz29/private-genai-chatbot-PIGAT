@@ -10,8 +10,11 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "child_process": "^1.0.2",
         "express": "^4.19.2",
         "express-session": "1.18",
+        "node-fetch": "^3.3.2",
+        "node-fetch-commonjs": "^3.3.2",
         "socket.io": "^4.7.5"
     }
 }
