@@ -1,7 +1,7 @@
 import sys
 import os
 from datetime import datetime
-from transformer import pipeline
+from transformers import pipeline
 # def merge_with_knowledge(message, session_id):
 #     knowledge_file = f"knowledge/knowledge_{session_id}.txt"
 #     if os.path.exists(knowledge_file):
