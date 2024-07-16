@@ -114,7 +114,7 @@ io.on('connection', (socket) => {
 app.post('/process_message', (req, res) => {
   const { message } = req.body;
 
-  const pythonProcess = spawn('python', ['add_time.py', message]);
+  const pythonProcess = spawn('python', ['chatbot.py', message]);
 
   pythonProcess.stdout.on('data', (data) => {
     const processedMessage = data.toString().trim(); 
